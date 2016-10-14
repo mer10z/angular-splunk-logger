@@ -7,7 +7,7 @@ module.exports = function(grunt) {
                 jshintrc: true
             },
             files: {
-                src: ['angular-loggly-logger.js']
+                src: ['angular-splunk-logger.js']
             }
         },
 
@@ -16,7 +16,7 @@ module.exports = function(grunt) {
                 sourceMap: true
             },
             main: {
-                files: { 'angular-loggly-logger.min.js': ['angular-loggly-logger.js'] }
+                files: { 'angular-splunk-logger.min.js': ['angular-splunk-logger.js'] }
             }
         },
 
@@ -36,7 +36,7 @@ module.exports = function(grunt) {
 
           //run JSHint on JS files
           jshint: {
-              files: ['angular-loggly-logger.js'],
+              files: ['angular-splunk-logger.js'],
               tasks: ['jshint']
           },
 

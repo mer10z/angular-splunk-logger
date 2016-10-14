@@ -1,22 +1,19 @@
 /**
- *  logglyLogger is a module which will send your log messages to a configured
- *  [Loggly](http://loggly.com) connector.
+ *  splunkLogger is a module which will send your log messages to a configured
+ *  [Splunk](http://splunk.com) server.
  *
- *  Major credit should go to Thomas Burleson, who's highly informative blog
- *  post on [Enhancing AngularJs Logging using Decorators](http://bit.ly/1pOI0bb)
- *  provided the foundation (if not the majority of the brainpower) for this
- *  module.
+ *  This is based on https://github.com/ajbrown/angular-loggly-logger by ajbrown
  */
 ; (function( angular ) {
   "use strict";
 
-  angular.module( 'logglyLogger.logger', [] )
-    .provider( 'LogglyLogger', function() {
+  angular.module( 'splunkLogger.logger', [] )
+    .provider( 'SplunkLogger', function() {
       var self = this;
 
       var logLevels = [ 'DEBUG', 'INFO', 'WARN', 'ERROR' ];
 
-      var https = true;
+      //var https = true;
       var extra = {};
       var includeCurrentUrl = false;
       var includeTimestamp = false;
@@ -27,23 +24,28 @@
       var loggingEnabled = true;
       var labels = {};
 
-      // The minimum level of messages that should be sent to loggly.
+      // The minimum level of messages that should be sent to splunk.
       var level = 0;
 
       var token = null;
-      var endpoint = '://logs-01.loggly.com/inputs/';
+      var endpoint = null;
 
-        var buildUrl = function () {
-          return (https ? 'https' : 'http') + endpoint + token + '/tag/' + (tag ? tag : 'AngularJS' ) + '/';
-        };
+      this.endpoint = function(e) {
+        if (angular.isDefined(e)) {
+          endpoint = e;
+          return self;
+        }
 
-      this.setExtra = function (d) {
+        return endpoint;
+      }
+
+      this.setExtra = function(d) {
         extra = d;
         return self;
       };
 
-      this.fields = function ( d ) {
-        if( angular.isDefined( d ) ) {
+      this.fields = function(d) {
+        if (angular.isDefined(d) ) {
           extra = d;
           return self;
         }
@@ -123,12 +125,12 @@
         return sendConsoleErrors;
       };
 
-      this.level = function ( name ) {
+      this.level = function (name) {
 
-        if( angular.isDefined( name ) ) {
+        if (angular.isDefined(name)) {
           var newLevel = logLevels.indexOf( name.toUpperCase() );
 
-          if( newLevel < 0 ) {
+          if (newLevel < 0) {
             throw "Invalid logging level specified: " + name;
           } else {
             level = newLevel;
@@ -140,21 +142,21 @@
         return logLevels[level];
       };
 
-      this.isLevelEnabled = function( name ) {
-        return logLevels.indexOf( name.toUpperCase() ) >= level;
+      this.isLevelEnabled = function(name) {
+        return logLevels.indexOf(name.toUpperCase()) >= level;
       };
 
-      this.loggingEnabled = function (flag) {
-          if (angular.isDefined(flag)) {
-              loggingEnabled = !!flag;
-              return self;
-          }
+      this.loggingEnabled = function(flag) {
+        if (angular.isDefined(flag)) {
+          loggingEnabled = !!flag;
+          return self;
+        }
 
-          return loggingEnabled;
+        return loggingEnabled;
       };
 
 
-      this.logToConsole = function (flag) {
+      this.logToConsole = function(flag) {
         if (angular.isDefined(flag)) {
           logToConsole = !!flag;
           return self;
@@ -169,7 +171,7 @@
 
 
         /**
-         * Send the specified data to loggly as a json message.
+         * Send the specified data to splunk as a json message.
          * @param data
          */
         var sendMessage = function (data) {
@@ -181,7 +183,7 @@
           //TODO we're injecting this here to resolve circular dependency issues.  Is this safe?
           var $window = $injector.get( '$window' );
           var $location = $injector.get( '$location' );
-		   //we're injecting $http
+          //we're injecting $http
           var $http = $injector.get( '$http' );
 
           lastLog = new Date();
@@ -200,13 +202,14 @@
             sentData.userAgent = $window.navigator.userAgent;
           }
 
-          //Loggly's API doesn't send us cross-domain headers, so we can't interact directly
+          //Splunk's API doesn't send us cross-domain headers, so we can't interact directly
            //Set header
           var config = {
             headers: {
-             'Content-Type': 'text/plain'
+             //'Content-Type': 'text/plain'
+              'Authorization': 'Splunk ' + this.token
             },
-            withCredentials: false
+            responseType: 'json'
           };
 
           // Apply labels
@@ -217,8 +220,8 @@
             }
           }
 
-          //Ajax call to send data to loggly
-          $http.post(buildUrl(),sentData,config);
+          //Ajax call to send data to splunk
+          $http.post(this.endpoint, sentData, config);
         };
 
         var attach = function() {
@@ -260,18 +263,18 @@
     } );
 
 
-  angular.module( 'logglyLogger', ['logglyLogger.logger'] )
+  angular.module( 'splunkLogger', ['splunkLogger.logger'] )
     .config( [ '$provide', function( $provide ) {
 
       $provide.decorator('$log', [ "$delegate", '$injector', function ( $delegate, $injector ) {
 
-        var logger = $injector.get('LogglyLogger');
+        var logger = $injector.get('SplunkLogger');
 
         // install a window error handler
         if(logger.sendConsoleErrors() === true) {
           var _onerror = window.onerror;
 
-          //send console error messages to Loggly
+          //send console error messages to Splunk
           window.onerror = function (msg, url, line, col, error) {
             logger.sendMessage({
               level : 'ERROR',
@@ -327,7 +330,7 @@
               sending.logger = msg;
             }
 
-            //Send the message to through the loggly sender
+            //Send the message to through the splunk sender
             logger.sendMessage( sending );
           };
 

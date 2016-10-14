@@ -1,3 +1,3 @@
 require('angular');
-require('./angular-loggly-logger');
-module.exports = 'logglyLogger';
+require('./angular-splunk-logger');
+module.exports = 'splunkLogger';

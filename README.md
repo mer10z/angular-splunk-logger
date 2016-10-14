@@ -1,51 +1,51 @@
-[![Build Status](https://travis-ci.org/ajbrown/angular-loggly-logger.svg)](https://travis-ci.org/ajbrown/angular-loggly-logger)
-[![Coverage Status](https://coveralls.io/repos/ajbrown/angular-loggly-logger/badge.svg?branch=master)](https://coveralls.io/r/ajbrown/angular-loggly-logger?branch=master)
-[![Join the chat at https://gitter.im/ajbrown/angular-loggly-logger](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/ajbrown/angular-loggly-logger?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Build Status](https://travis-ci.org/ajbrown/angular-splunk-logger.svg)](https://travis-ci.org/ajbrown/angular-splunk-logger)
+[![Coverage Status](https://coveralls.io/repos/ajbrown/angular-splunk-logger/badge.svg?branch=master)](https://coveralls.io/r/ajbrown/angular-splunk-logger?branch=master)
+[![Join the chat at https://gitter.im/ajbrown/angular-splunk-logger](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/ajbrown/angular-splunk-logger?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 
-Angular Loggly Logger is a module which will decorate Angular's $log service,
-and provide a `LogglyLogger` service which can be used to manually send messages
-of any kind to the [Loggly](https://www.loggly.com) cloud log management service.
+Angular Splunk Logger is a module which will decorate Angular's $log service,
+and provide a `SplunkLogger` service which can be used to manually send messages
+of any kind to the [Splunk](https://www.splunk.com) cloud log management service.
 
 
 ### Getting Started
 
-LogglyLogger can be installed with bower:
+SplunkLogger can be installed with bower:
 
 ```
-bower install angular-loggly-logger
+bower install angular-splunk-logger
 ```
 
 Or with npm:
 
 ```
-npm install --save angular-loggly-logger
+npm install --save angular-splunk-logger
 ```
 
-Once configured (by including "logglyLogger" as a module dependency), the `$log`
+Once configured (by including "splunkLogger" as a module dependency), the `$log`
 service will automatically be decorated, and all messages logged will be handled
-as normal as well as formated and passed to LogglyLogger.sendMessage.
+as normal as well as formated and passed to SplunkLogger.sendMessage.
 The plain text messages are sent into the "json.message" field with the decorated
-log while custom JSON objects are sent via "json.messageObj" field as Loggly
+log while custom JSON objects are sent via "json.messageObj" field as Splunk
 only supports one type per field.
 
-To use both the decorated $log and the LogglyLogger service, you must first
-configure it with an inputToken, which is done via the LogglyLoggerProvider:
+To use both the decorated $log and the SplunkLogger service, you must first
+configure it with an inputToken, which is done via the SplunkLoggerProvider:
 
 ```javascript
-angular.module( 'myApp', [require('angular-loggly-logger')] )
+angular.module( 'myApp', [require('angular-splunk-logger')] )
 
-  .config(["LogglyLoggerProvider", function( LogglyLoggerProvider ) {
-    LogglyLoggerProvider.inputToken( '<loggly input token here>' );
+  .config(["SplunkLoggerProvider", function( SplunkLoggerProvider ) {
+    SplunkLoggerProvider.inputToken( '<splunk input token here>' );
   } ]);
 
-  .run(["LogglyLogger", "$log", function( LogglyLogger, $log ) {
+  .run(["SplunkLogger", "$log", function( SplunkLogger, $log ) {
 
-    //This will be sent to both the console and Loggly
+    //This will be sent to both the console and Splunk
     $log.info( "I'm a little teapot." );
 
-    //This will be sent to loggly only
-    LogglyLogger.sendMessage( { message : 'Short and Stout.' } );
+    //This will be sent to splunk only
+    SplunkLogger.sendMessage( { message : 'Short and Stout.' } );
   }])
 
 ```
@@ -61,7 +61,7 @@ When sent through the `$log` decorator, messages will be formatted as follows:
   level: "WARN",
   timestamp: "2014-05-01T13:10Z",
   msg: "Danger! Danger!",
-  url: "https://github.com/ajbrown/angular-loggly-logger/demo/index.html",
+  url: "https://github.com/ajbrown/angular-splunk-logger/demo/index.html",
 }
 
 // Example: $log.debug( 'User submitted something:', { foo: 'A.J', bar: 'Space' } )
@@ -70,14 +70,14 @@ When sent through the `$log` decorator, messages will be formatted as follows:
   level: "DEBUG",
   timestamp: "2014-05-01T13:18Z",
   msg: ["User submitted something", { foo: 'A.J.', bar: 'Space' }],
-  url: "https://github.com/ajbrown/angular-loggly-logger/demo/index.html",
+  url: "https://github.com/ajbrown/angular-splunk-logger/demo/index.html",
 }
 ```
 
 > However, 'url' and 'timestamp' are not included by default.  You must enable those options in your application config (see below).
 
 
-Note that if you do not call `LogglyLoggerProvider.inputToken()` in a config method, messages will not be sent to loggly.  At the moment, there is no warning -- your message is just ignored.
+Note that if you do not call `SplunkLoggerProvider.inputToken()` in a config method, messages will not be sent to splunk.  At the moment, there is no warning -- your message is just ignored.
 
 ### Configuration
 
@@ -85,13 +85,13 @@ The following configuration options are available.
 
 ```javascript
 
-  LogglyLoggerProvider
+  SplunkLoggerProvider
 
-    // set the logging level for messages sent to Loggly.  Default is 'DEBUG',
+    // set the logging level for messages sent to Splunk.  Default is 'DEBUG',
     // which will send all log messages.
     .level( 'DEBUG' )
 
-    // set the token of the loggly input to use.  Must be set, or no logs
+    // set the token of the splunk input to use.  Must be set, or no logs
     // will be sent.
     .inputToken( '<your-token>' )
 
@@ -100,11 +100,11 @@ The following configuration options are available.
     .useHttps( true )
 
     // should the value of $location.absUrl() be sent as a "url" key in the
-    // message object that's sent to loggly?  Default is false.
+    // message object that's sent to splunk?  Default is false.
     .includeUrl( false )
 
     // should the value of $window.navigator.userAgent be sent as a "userAgent" key in the
-    // message object that's sent to loggly?  Default is false.
+    // message object that's sent to splunk?  Default is false.
     .includeUserAgent( false )
 
     // should the current timestamp be included? Default is false.
@@ -114,12 +114,12 @@ The following configuration options are available.
     // Default is "angular"
     .inputTag("angular,customTag")
 
-    // Send console error stack traces to Loggly.  Default is false.
+    // Send console error stack traces to Splunk.  Default is false.
     .sendConsoleErrors( false )
 
     // Toggle logging to console.  When set to false, messages will not be
     // be passed along to the original $log methods.  This makes it easy to
-    // keep sending messages to Loggly in production without also sending them
+    // keep sending messages to Splunk in production without also sending them
     // to the console.   Default is true.
     .logToConsole( true )
 
@@ -142,12 +142,12 @@ The following configuration options are available.
 
 ### Sending JSON Fields
 
-You can also default some "extra/default" information to be sent with each log message.  When this is set, `LogglyLogger`
+You can also default some "extra/default" information to be sent with each log message.  When this is set, `SplunkLogger`
 will include the key/values provided with all messages, plus the data to be sent for each specific logging request.
 
 ```javascript
 
-  LogglyLoggerProvider.fields( { appVersion: 1.1.0, browser: 'Chrome' } );
+  SplunkLoggerProvider.fields( { appVersion: 1.1.0, browser: 'Chrome' } );
 
   //...
 
@@ -156,12 +156,12 @@ will include the key/values provided with all messages, plus the data to be sent
   >> { appVersion: 1.1.0, browser: 'Chrome', level: 'WARN', message: 'Danger! Danger', url: 'http://google.com' }
 ```
 
-Extra fields can also be added at runtime using the `LogglyLogger` service:
+Extra fields can also be added at runtime using the `SplunkLogger` service:
 
 ```javascript
-  app.controller( 'MainCtrl', ["$scope", "$log", "LogglyLogger", function( $scope, $log, LogglyLogger ) {
+  app.controller( 'MainCtrl', ["$scope", "$log", "SplunkLogger", function( $scope, $log, SplunkLogger ) {
 
-    logglyLogger.fields( { username: "foobar" } );
+    splunkLogger.fields( { username: "foobar" } );
 
     //...
 
@@ -173,7 +173,7 @@ Extra fields can also be added at runtime using the `LogglyLogger` service:
 ```
 
 
-Beware that when using `setExtra` with `LogglyLogger.sendMessage( obj )`, any properties in your `obj` that are the same as your `extra` will be overwritten.  
+Beware that when using `setExtra` with `SplunkLogger.sendMessage( obj )`, any properties in your `obj` that are the same as your `extra` will be overwritten.  
 
 ## ChangeLog
 - v0.2.2 - Fixes preflight cross origin issues.

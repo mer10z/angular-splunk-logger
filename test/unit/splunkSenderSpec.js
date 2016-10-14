@@ -2,8 +2,8 @@
 
 /* jasmine specs for services go here */
 
-describe('logglyLogger Module:', function() {
-  var logglyLoggerProvider,
+describe('splunkLogger Module:', function() {
+  var splunkLoggerProvider,
     levels = ['DEBUG', 'INFO', 'WARN', 'ERROR'],
     realOnerror, mockOnerror;
 
@@ -16,14 +16,14 @@ describe('logglyLogger Module:', function() {
 
     // Initialize the service provider
     // by injecting it to a fake module's config block
-    var fakeModule = angular.module('testing.harness', ['logglyLogger'], function () {});
-    fakeModule.config( function(LogglyLoggerProvider) {
-      logglyLoggerProvider = LogglyLoggerProvider;
-      logglyLoggerProvider.sendConsoleErrors(true)
+    var fakeModule = angular.module('testing.harness', ['splunkLogger'], function () {});
+    fakeModule.config( function(SplunkLoggerProvider) {
+      splunkLoggerProvider = SplunkLoggerProvider;
+      splunkLoggerProvider.sendConsoleErrors(true)
     });
 
     // Initialize test.app injector
-    module('logglyLogger', 'testing.harness');
+    module('splunkLogger', 'testing.harness');
 
     // Kickstart the injectors previously registered
     // with calls to angular.mock.module
@@ -34,27 +34,27 @@ describe('logglyLogger Module:', function() {
     window.onerror = realOnerror;
   });
 
-  describe( 'LogglyLoggerProvider', function() {
+  describe( 'SplunkLoggerProvider', function() {
     it( 'can have a logging level configured', function() {
 
       for( var i in levels ) {
-        logglyLoggerProvider.level( levels[i] );
-        expect( logglyLoggerProvider.level() ).toEqual( levels[i] );
+        splunkLoggerProvider.level( levels[i] );
+        expect( splunkLoggerProvider.level() ).toEqual( levels[i] );
       }
     });
 
     it( 'will throw an exception if an invalid level is supplied', function() {
 
-      expect( function() { logglyLoggerProvider.level('TEST') } ).toThrow();
+      expect( function() { splunkLoggerProvider.level('TEST') } ).toThrow();
     });
 
     it( 'can determine if a given level is enabled', function() {
       for( var a in levels ) {
 
-        logglyLoggerProvider.level( levels[a] );
+        splunkLoggerProvider.level( levels[a] );
 
         for( var b in levels ) {
-          expect( logglyLoggerProvider.isLevelEnabled( levels[b] )).toBe( b >= a );
+          expect( splunkLoggerProvider.isLevelEnabled( levels[b] )).toBe( b >= a );
         }
       }
     });
@@ -62,17 +62,17 @@ describe('logglyLogger Module:', function() {
     it( 'can specify extra fields to be sent with each log message', function() {
       var extra = { "test": "extra" };
 
-      logglyLoggerProvider.fields( extra );
+      splunkLoggerProvider.fields( extra );
 
-      expect( logglyLoggerProvider.fields()).toEqual( extra );
+      expect( splunkLoggerProvider.fields()).toEqual( extra );
 
     });
 
   });
 
-  describe( 'LogglyLogger', function() {
+  describe( 'SplunkLogger', function() {
     var token = 'test123456',
-      tag = 'logglyLogger',
+      tag = 'splunkLogger',
       message, service, $log, $httpBackend;
 
     beforeEach(function () {
@@ -81,7 +81,7 @@ describe('logglyLogger Module:', function() {
       inject(function ($injector) {
         $log = $injector.get('$log');
         $httpBackend = $injector.get('$httpBackend');
-        service = $injector.get('LogglyLogger');
+        service = $injector.get('SplunkLogger');
         service.attach();
       });
     });
@@ -95,8 +95,8 @@ describe('logglyLogger Module:', function() {
       expect(service).not.toBe(null);
     });
 
-    it('will not send a message to loggly if a token is not specified', function () {
-      var url = 'https://logs-01.loggly.com';
+    it('will not send a message to splunk if a token is not specified', function () {
+      var url = 'https://logs-01.splunk.com';
       var forbiddenCallTriggered = false;
       $httpBackend
         .when(url)
@@ -110,15 +110,15 @@ describe('logglyLogger Module:', function() {
       expect(forbiddenCallTriggered).toBe(false);
     });
 
-    it('will send a message to loggly only when properly configured', function () {
+    it('will send a message to splunk only when properly configured', function () {
       var expectMessage = { message: 'A test message' };
-      var tag = 'logglyLogger';
-      var testURL = 'https://logs-01.loggly.com/inputs/test123456/tag/logglyLogger/';
+      var tag = 'splunkLogger';
+      var testURL = 'https://logs-01.splunk.com/inputs/test123456/tag/splunkLogger/';
       var generatedURL;
 
-      logglyLoggerProvider.inputToken(token);
-      logglyLoggerProvider.includeUrl(false);
-      logglyLoggerProvider.inputTag(tag);
+      splunkLoggerProvider.inputToken(token);
+      splunkLoggerProvider.includeUrl(false);
+      splunkLoggerProvider.inputTag(tag);
 
       $httpBackend
         .expectPOST(testURL, expectMessage)
@@ -134,12 +134,12 @@ describe('logglyLogger Module:', function() {
     });
 
     it('will use http if useHttps is set to false', function () {
-      var testURL = 'http://logs-01.loggly.com/inputs/test123456/tag/AngularJS/';
+      var testURL = 'http://logs-01.splunk.com/inputs/test123456/tag/AngularJS/';
       var generatedURL;
 
-      logglyLoggerProvider.inputToken(token);
-      logglyLoggerProvider.useHttps(false);
-      logglyLoggerProvider.includeUrl(false);
+      splunkLoggerProvider.inputToken(token);
+      splunkLoggerProvider.useHttps(false);
+      splunkLoggerProvider.includeUrl(false);
 
       $httpBackend
         .expectPOST(testURL, message)
@@ -157,17 +157,17 @@ describe('logglyLogger Module:', function() {
     });
 
     it('will include the current url if includeUrl() is not set to false', function () {
-      var expectMessage = angular.extend(message, { url: 'http://bloggly.com' });
-      var testURL = 'https://logs-01.loggly.com/inputs/test123456/tag/AngularJS/';
+      var expectMessage = angular.extend(message, { url: 'http://bsplunk.com' });
+      var testURL = 'https://logs-01.splunk.com/inputs/test123456/tag/AngularJS/';
       var payload;
 
       inject(function ($injector) {
         // mock browser url
-        $injector.get('$browser').url('http://bloggly.com');
+        $injector.get('$browser').url('http://bsplunk.com');
       });
 
-      logglyLoggerProvider.inputToken( token );
-      logglyLoggerProvider.includeUrl( true );
+      splunkLoggerProvider.inputToken( token );
+      splunkLoggerProvider.includeUrl( true );
 
       $httpBackend
         .expectPOST(testURL, expectMessage)
@@ -179,17 +179,17 @@ describe('logglyLogger Module:', function() {
       service.sendMessage( message );
 
       $httpBackend.flush();
-      expect(payload.url).toEqual('http://bloggly.com');
+      expect(payload.url).toEqual('http://bsplunk.com');
 
     });
 
     it('will include the current userAgent if includeUserAgent() is not set to false', function () {
       var expectMessage = angular.extend(message, { userAgent: window.navigator.userAgent });
-      var testURL = 'https://logs-01.loggly.com/inputs/test123456/tag/AngularJS/';
+      var testURL = 'https://logs-01.splunk.com/inputs/test123456/tag/AngularJS/';
       var payload;
 
-      logglyLoggerProvider.inputToken( token );
-      logglyLoggerProvider.includeUserAgent( true );
+      splunkLoggerProvider.inputToken( token );
+      splunkLoggerProvider.includeUserAgent( true );
 
       $httpBackend
         .expectPOST(testURL, expectMessage)
@@ -217,12 +217,12 @@ describe('logglyLogger Module:', function() {
       var payload, payload2;
       var extra = { appVersion: '1.1.0', browser: 'Chrome' };
       var expectMessage = angular.extend(message, extra);
-      var testURL = 'https://logs-01.loggly.com/inputs/test123456/tag/AngularJS/';
+      var testURL = 'https://logs-01.splunk.com/inputs/test123456/tag/AngularJS/';
 
-      logglyLoggerProvider.inputToken( token );
+      splunkLoggerProvider.inputToken( token );
 
 
-      logglyLoggerProvider.fields( extra );
+      splunkLoggerProvider.fields( extra );
       $httpBackend
         .expectPOST(testURL, expectMessage)
         .respond(function (method, url, data) {
@@ -252,12 +252,12 @@ describe('logglyLogger Module:', function() {
 
     it( 'will include extra fields if set via the service', function() {
       var payload;
-      var testURL = 'https://logs-01.loggly.com/inputs/test123456/tag/AngularJS/';
+      var testURL = 'https://logs-01.splunk.com/inputs/test123456/tag/AngularJS/';
       var extra = { appVersion: '1.1.0', browser: 'Chrome' };
       var expectMessage = angular.extend(message, extra);
 
-      logglyLoggerProvider.inputToken( token );
-      logglyLoggerProvider.fields( extra );
+      splunkLoggerProvider.inputToken( token );
+      splunkLoggerProvider.fields( extra );
 
       $httpBackend
         .expectPOST(testURL, expectMessage)
@@ -272,12 +272,12 @@ describe('logglyLogger Module:', function() {
       expect(payload).toEqual(expectMessage);
     });
 
-    it( '$log has a logglySender attached', function() {
-      var testURL = 'https://logs-01.loggly.com/inputs/test123456/tag/AngularJS/';
+    it( '$log has a splunkSender attached', function() {
+      var testURL = 'https://logs-01.splunk.com/inputs/test123456/tag/AngularJS/';
       var payload, expectMessage;
 
-      logglyLoggerProvider.inputToken( token );
-      logglyLoggerProvider.includeUrl( false );
+      splunkLoggerProvider.inputToken( token );
+      splunkLoggerProvider.includeUrl( false );
 
       angular.forEach( levels, function (level) {
         expectMessage = angular.extend(message, { level: level });
@@ -298,7 +298,7 @@ describe('logglyLogger Module:', function() {
 
       for( var a in levels ) {
 
-        logglyLoggerProvider.level( levels[a] );
+        splunkLoggerProvider.level( levels[a] );
 
         for( var b in levels ) {
 
@@ -315,13 +315,13 @@ describe('logglyLogger Module:', function() {
     });
 
     it( 'will not send messages if logs are not enabled', function() {
-      var url = 'https://logs-01.loggly.com/inputs/' + token;
-      var tag = 'logglyLogger';
+      var url = 'https://logs-01.splunk.com/inputs/' + token;
+      var tag = 'splunkLogger';
 
-      logglyLoggerProvider.inputToken(token);
-      logglyLoggerProvider.includeUrl(false);
-      logglyLoggerProvider.loggingEnabled(false);
-      logglyLoggerProvider.inputTag(tag);
+      splunkLoggerProvider.inputToken(token);
+      splunkLoggerProvider.includeUrl(false);
+      splunkLoggerProvider.loggingEnabled(false);
+      splunkLoggerProvider.inputTag(tag);
 
       var forbiddenCallTriggered = false;
       $httpBackend
@@ -336,14 +336,14 @@ describe('logglyLogger Module:', function() {
     });
 
     it( 'will disable logs after config had them enabled and not send messages', function() {
-      var tag = 'logglyLogger';
-      var testURL = 'https://logs-01.loggly.com/inputs/test123456/tag/logglyLogger/';
+      var tag = 'splunkLogger';
+      var testURL = 'https://logs-01.splunk.com/inputs/test123456/tag/splunkLogger/';
       var generatedURL;
 
-      logglyLoggerProvider.inputToken(token);
-      logglyLoggerProvider.includeUrl(false);
-      logglyLoggerProvider.loggingEnabled(true);
-      logglyLoggerProvider.inputTag(tag);
+      splunkLoggerProvider.inputToken(token);
+      splunkLoggerProvider.includeUrl(false);
+      splunkLoggerProvider.loggingEnabled(true);
+      splunkLoggerProvider.inputTag(tag);
 
       $httpBackend
         .expectPOST(testURL, message)
@@ -370,18 +370,18 @@ describe('logglyLogger Module:', function() {
       }).not.toThrow();
     });
 
-    it( 'can update the Loggly token', function() {
-      logglyLoggerProvider.inputToken('');
+    it( 'can update the Splunk token', function() {
+      splunkLoggerProvider.inputToken('');
       service.inputToken('foo');
-      expect(logglyLoggerProvider.inputToken()).toEqual('foo');
+      expect(splunkLoggerProvider.inputToken()).toEqual('foo');
     });
 
     it('will override labels as specified', function () {
       var expectMessage = { msg: message.message };
-      var testURL = 'https://logs-01.loggly.com/inputs/test123456/tag/AngularJS/';
+      var testURL = 'https://logs-01.splunk.com/inputs/test123456/tag/AngularJS/';
 
-      logglyLoggerProvider.inputToken( token );
-      logglyLoggerProvider.labels({
+      splunkLoggerProvider.inputToken( token );
+      splunkLoggerProvider.labels({
         message: 'msg'
       });
 
@@ -400,9 +400,9 @@ describe('logglyLogger Module:', function() {
     it('should log console errors if sendConsoleErrors() is not false', function() {
       var error = new Error("some error");
       var expectMessage = {level: 'ERROR', message: error.message, line: 1, col: 2, stack: error.stack};
-      var testURL = 'https://logs-01.loggly.com/inputs/test123456/tag/AngularJS/';
+      var testURL = 'https://logs-01.splunk.com/inputs/test123456/tag/AngularJS/';
 
-      logglyLoggerProvider.inputToken(token);
+      splunkLoggerProvider.inputToken(token);
 
       $httpBackend
         .expectPOST(testURL, expectMessage)

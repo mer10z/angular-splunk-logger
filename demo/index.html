@@ -1,12 +1,12 @@
 <!doctype html>
-<html ng-app="logglyLogger.demo">
+<html ng-app="splunkLogger.demo">
   <head>
 
   </head>
   <body ng-controller="MainCtrl">
 
     <p ng-show="inputToken.trim() == ''">
-      Make sure you edit demo/app.js, and add a valid inputToken to the "logglyInputToken" constant's value.!
+      Make sure you edit demo/app.js, and add a valid inputToken to the "splunkInputToken" constant's value.!
     </p>
 
     <form name="form" novalidate>
@@ -27,7 +27,7 @@
     </form>
 
     <script src="../node_modules/angular/angular.min.js"></script>
-    <script src="../angular-loggly-logger.min.js"></script>
+    <script src="../angular-splunk-logger.min.js"></script>
     <script src="app.js"></script>
   </body>
 </html>

@@ -1,18 +1,15 @@
 {
-  "name": "angular-loggly-logger",
+  "name": "angular-splunk-logger",
   "version": "0.2.4",
   "main": "index.js",
-  "description": "An AngularJs service and $log decorator for Loggly",
+  "description": "An AngularJs service and $log decorator for Splunk",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ajbrown/angular-loggly-logger.git"
+    "url": "https://github.com/mer10z/angular-splunk-logger.git"
   },
-  "bugs": "https://github.com/ajbrown/angular-loggly-logger/issues",
-  "author": "A.J. Brown <aj@ajbrown.org> (http://ajbrown.org)",
+  "bugs": "https://github.com/mer10z/angular-splunk-logger/issues",
+  "author": "Luke Mertens <lmertens@gmail.com> (http://LukeMertens.com)",
   "contributors": [
-    "Jason Skowronski (https://github.com/mostlyjason)",
-    "Vin Halbwachs (https://github.com/vhalbwachs)",
-    "Jake Todaro (https://github.com/jaketodaro)"
   ],
   "keywords": [
     "angular",

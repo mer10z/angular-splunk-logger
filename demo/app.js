@@ -1,15 +1,15 @@
 ; (function(angular) {
 
-    angular.module( 'logglyLogger.demo', ['logglyLogger'] )
+    angular.module( 'splunkLogger.demo', ['splunkLogger'] )
 
     .constant(
-        'logglyInputToken', ''
+        'splunkInputToken', ''
     )
 
-    .config( function( LogglyLoggerProvider, logglyInputToken ) {
+    .config( function( SplunkLoggerProvider, splunkInputToken ) {
 
-        LogglyLoggerProvider
-            .inputToken( logglyInputToken )
+        SplunkLoggerProvider
+            .inputToken( splunkInputToken )
             .useHttps( true )
             .includeTimestamp( true )
             .includeUrl( true )
@@ -19,9 +19,9 @@
 
     } )
 
-    .controller( 'MainCtrl', function( $scope, $log, LogglyLogger, logglyInputToken ) {
+    .controller( 'MainCtrl', function( $scope, $log, SplunkLogger, splunkInputToken ) {
 
-        $scope.inputToken = logglyInputToken;
+        $scope.inputToken = splunkInputToken;
         $scope.message = '';
         $scope.extra = '{}';
 
@@ -29,8 +29,8 @@
         var megaLog = $log.getLogger( 'MegaLogger' );
 
         $scope.updateExtra = function() {
-          LogglyLogger.fields( angular.fromJson( $scope.extra ) );
-          $log.info( "Updated fields:", LogglyLogger.fields() );
+          SplunkLogger.fields( angular.fromJson( $scope.extra ) );
+          $log.info( "Updated fields:", SplunkLogger.fields() );
         };
 
         $scope.logIt = function() {

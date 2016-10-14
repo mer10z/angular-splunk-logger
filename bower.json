@@ -1,18 +1,18 @@
 {
-  "name": "angular-loggly-logger",
+  "name": "angular-splunk-logger",
   "version": "0.2.4",
-  "main": "angular-loggly-logger.js",
+  "main": "angular-splunk-logger.js",
   "keywords": [
     "angularjs",
-    "loggly",
+    "splunk",
     "logging",
     "logger",
     "log"
   ],
   "authors": [
     {
-      "name": "A.J. Brown",
-      "email": "aj@ajbrown.org"
+      "name": "Luke Mertens",
+      "email": "lmertens@gmail.com"
     }
   ],
   "ignore": [
