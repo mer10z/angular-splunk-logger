@@ -1,7 +1,8 @@
-[![Build Status](https://travis-ci.org/ajbrown/angular-splunk-logger.svg)](https://travis-ci.org/ajbrown/angular-splunk-logger)
-[![Coverage Status](https://coveralls.io/repos/ajbrown/angular-splunk-logger/badge.svg?branch=master)](https://coveralls.io/r/ajbrown/angular-splunk-logger?branch=master)
-[![Join the chat at https://gitter.im/ajbrown/angular-splunk-logger](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/ajbrown/angular-splunk-logger?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Build Status](https://travis-ci.org/mer10z/angular-splunk-logger.svg)](https://travis-ci.org/mer10z/angular-splunk-logger)
+[![Coverage Status](https://coveralls.io/repos/mer10z/angular-splunk-logger/badge.svg?branch=master)](https://coveralls.io/r/mer10z/angular-splunk-logger?branch=master)
+[![Join the chat at https://gitter.im/mer10z/angular-splunk-logger](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/mer10z/angular-splunk-logger?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
+### WORK IN PROGRESS NOT YET TESTED PROBABLY DOESN'T WORK MIGHT CRASH YOUR SERVER DON'T USE
 
 Angular Splunk Logger is a module which will decorate Angular's $log service,
 and provide a `SplunkLogger` service which can be used to manually send messages
@@ -30,13 +31,15 @@ log while custom JSON objects are sent via "json.messageObj" field as Splunk
 only supports one type per field.
 
 To use both the decorated $log and the SplunkLogger service, you must first
-configure it with an inputToken, which is done via the SplunkLoggerProvider:
+configure it with an inputToken and setEndpoint, which is done via the
+SplunkLoggerProvider:
 
 ```javascript
 angular.module( 'myApp', [require('angular-splunk-logger')] )
 
   .config(["SplunkLoggerProvider", function( SplunkLoggerProvider ) {
     SplunkLoggerProvider.inputToken( '<splunk input token here>' );
+    SplunkLoggerProvider.setEndpoint( '<splunk event collector url here>' );
   } ]);
 
   .run(["SplunkLogger", "$log", function( SplunkLogger, $log ) {
@@ -61,7 +64,7 @@ When sent through the `$log` decorator, messages will be formatted as follows:
   level: "WARN",
   timestamp: "2014-05-01T13:10Z",
   msg: "Danger! Danger!",
-  url: "https://github.com/ajbrown/angular-splunk-logger/demo/index.html",
+  url: "https://github.com/mer10z/angular-splunk-logger/demo/index.html",
 }
 
 // Example: $log.debug( 'User submitted something:', { foo: 'A.J', bar: 'Space' } )
@@ -70,7 +73,7 @@ When sent through the `$log` decorator, messages will be formatted as follows:
   level: "DEBUG",
   timestamp: "2014-05-01T13:18Z",
   msg: ["User submitted something", { foo: 'A.J.', bar: 'Space' }],
-  url: "https://github.com/ajbrown/angular-splunk-logger/demo/index.html",
+  url: "https://github.com/mer10z/angular-splunk-logger/demo/index.html",
 }
 ```
 
@@ -183,4 +186,4 @@ Beware that when using `setExtra` with `SplunkLogger.sendMessage( obj )`, any pr
 
 ## Contributing
 
-Contributions are awesome, welcomed, and wanted.  Please contribute ideas by [opening a new issue](http://github.com/ajbrown/angular-loggy-logger/issues), or code by creating a new pull request.  Please make sure your pull request targets the "develop" branch.
+Contributions are awesome, welcomed, and wanted.  Please contribute ideas by [opening a new issue](http://github.com/mer10z/angular-loggy-logger/issues), or code by creating a new pull request.  Please make sure your pull request targets the "develop" branch.
