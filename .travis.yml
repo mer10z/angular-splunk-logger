@@ -1,21 +1,19 @@
 language: node_js
 node_js:
-  - 0.1
+- 0.1
 deploy:
-  - provider: npm
-    email: lmertens@gmail.com
-    api_key:
-      secure: C07sCtkimrvDgQZZUVWjlPD/axfRAYJEWMYW6Cu5T1qSz1BZwKmXxNLJouKk1Q+jwlWVWNnJ0kOL/cUTN7oo1YaIsHbE7ufxJoHeyPnOu7oz0FRxYDplZ/3ukQteDHxZkIYjgzfgXWGXbEDoOfzT63+DsDMXQDn7CQrs6bXxv0E=
-    on:
-      branch: master
-      tags: true
-
+  provider: releases
+  api_key:
+    secure: O3ovQhHJzbxM4emaTjQUzQ22+YhDr8IGa0Ll4m4VmNJsNsdyJRoDFChVrNUMxpHu92ZtAhktSyF50ymb9eBfh7dldZQi96RpmxIHXlKtwJ0BDQ5qO97Uxf/x0i4SHSu0VnQMOL2H5fwcex4DUFjkx+YRC8c1ZHQwc8SghLPGC5XzjNI4qZVGLixeyjoDCGM5Y+PhBoevGmcy07Ivo2Aj0E/zi3nWbxzi8qUwk0jDeDRnMkB1AiK/zyfSypQOjgn6t6CSzjUzxKjZf7a3N+nyCgQD+P4g7NEFPDdhIg0DMQDyp1d1AzW7hmdO/4+rQF2SKW8ObHC+X4VboikVs98tZsZ7MXYa8VP7lpL8NuU9Ef3PvYozhNox8r7/SPTWjC0wclsTlzzsLcxEVYtAzAr3Fqt0A02YcyvqgZ6u5qrbrExPShB0jSCGgx6OJ6IPpwEvhc2rZZ0yW2jGUcR3ZB7X5mCsbQn2mwefPoVkGNMCONv7CIVtHSTwkrTOfiL90q74Ql2SZ9iA2PFx2jdYXBhx3wxrRs1WFmakmuffLIqc4Fnz5cqnzzFY/8lEkxfExQzvDdfVjVbWn+42FHPbHnDfF7mEnNS+rLO1VU2Fuw+sOjQgqMena/2egRvn92/0tc1NA2DIztXXApkz96kRWyNIAC4kDir9G06XqP3U76ZUYso=
+  file: ''
+  on:
+    repo: mer10z/angular-splunk-logger
 before_script:
-  - export DISPLAY=:99.0
-  - sh -e /etc/init.d/xvfb start
-  - npm install -g grunt-cli
-  - npm start > /dev/null &
-  - npm run update-webdriver
-  - sleep 1
+- export DISPLAY=:99.0
+- sh -e /etc/init.d/xvfb start
+- npm install -g grunt-cli
+- npm start > /dev/null &
+- npm run update-webdriver
+- sleep 1
 script:
-  - grunt test
+- grunt test
