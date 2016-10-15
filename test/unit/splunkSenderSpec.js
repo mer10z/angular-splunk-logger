@@ -95,33 +95,26 @@ describe('splunkLogger Module:', function() {
       expect(service).not.toBe(null);
     });
 
-    it('will not send a message to splunk if a token is not specified', function () {
-      var url = 'https://logs-01.splunk.com';
-      var forbiddenCallTriggered = false;
-      $httpBackend
-        .when(url)
-        .respond(function () {
-          forbiddenCallTriggered = true;
-          return [400, ''];
-        });
-
+    it('will not send a message to splunk if a token and url are not specified', function () {
       service.sendMessage("A test message");
-      // Let test fail when request was triggered.
-      expect(forbiddenCallTriggered).toBe(false);
+      $httpBackend.verifyNoOutstandingRequest();
     });
 
     it('will send a message to splunk only when properly configured', function () {
       var expectMessage = { message: 'A test message' };
       var tag = 'splunkLogger';
-      var testURL = 'https://logs-01.splunk.com/inputs/test123456/tag/splunkLogger/';
+      var testURL = 'https://splunk.logger.test.url/test';
       var generatedURL;
 
       splunkLoggerProvider.inputToken(token);
+      splunkLoggerProvider.setEndpoint(testURL);
       splunkLoggerProvider.includeUrl(false);
       splunkLoggerProvider.inputTag(tag);
 
       $httpBackend
-        .expectPOST(testURL, expectMessage)
+        .expectPOST(testURL, expectMessage, function(headers) {
+          return headers['Authorization'] === ('Splunk ' + token);
+        })
         .respond(function (method, url, data) {
           generatedURL = url;
           return [200, "", {}];
@@ -133,32 +126,9 @@ describe('splunkLogger Module:', function() {
       expect(generatedURL).toEqual(testURL);
     });
 
-    it('will use http if useHttps is set to false', function () {
-      var testURL = 'http://logs-01.splunk.com/inputs/test123456/tag/AngularJS/';
-      var generatedURL;
-
-      splunkLoggerProvider.inputToken(token);
-      splunkLoggerProvider.useHttps(false);
-      splunkLoggerProvider.includeUrl(false);
-
-      $httpBackend
-        .expectPOST(testURL, message)
-        .respond(function (method, url, data) {
-          generatedURL = new URL(url);
-          return [200, "", {}];
-        });
-
-      service.sendMessage(message);
-
-      $httpBackend.flush();
-
-      expect(generatedURL.protocol).toEqual('http:');
-
-    });
-
     it('will include the current url if includeUrl() is not set to false', function () {
       var expectMessage = angular.extend(message, { url: 'http://bsplunk.com' });
-      var testURL = 'https://logs-01.splunk.com/inputs/test123456/tag/AngularJS/';
+      var testURL = 'https://splunk.logger.test.url/test';
       var payload;
 
       inject(function ($injector) {
@@ -167,6 +137,7 @@ describe('splunkLogger Module:', function() {
       });
 
       splunkLoggerProvider.inputToken( token );
+      splunkLoggerProvider.setEndpoint(testURL);
       splunkLoggerProvider.includeUrl( true );
 
       $httpBackend
@@ -185,10 +156,11 @@ describe('splunkLogger Module:', function() {
 
     it('will include the current userAgent if includeUserAgent() is not set to false', function () {
       var expectMessage = angular.extend(message, { userAgent: window.navigator.userAgent });
-      var testURL = 'https://logs-01.splunk.com/inputs/test123456/tag/AngularJS/';
+      var testURL = 'https://splunk.logger.test.url/test';
       var payload;
 
       splunkLoggerProvider.inputToken( token );
+      splunkLoggerProvider.setEndpoint(testURL);
       splunkLoggerProvider.includeUserAgent( true );
 
       $httpBackend
@@ -217,9 +189,10 @@ describe('splunkLogger Module:', function() {
       var payload, payload2;
       var extra = { appVersion: '1.1.0', browser: 'Chrome' };
       var expectMessage = angular.extend(message, extra);
-      var testURL = 'https://logs-01.splunk.com/inputs/test123456/tag/AngularJS/';
+      var testURL = 'https://splunk.logger.test.url/test';
 
       splunkLoggerProvider.inputToken( token );
+      splunkLoggerProvider.setEndpoint(testURL);
 
 
       splunkLoggerProvider.fields( extra );
@@ -252,11 +225,12 @@ describe('splunkLogger Module:', function() {
 
     it( 'will include extra fields if set via the service', function() {
       var payload;
-      var testURL = 'https://logs-01.splunk.com/inputs/test123456/tag/AngularJS/';
+      var testURL = 'https://splunk.logger.test.url/test';
       var extra = { appVersion: '1.1.0', browser: 'Chrome' };
       var expectMessage = angular.extend(message, extra);
 
       splunkLoggerProvider.inputToken( token );
+      splunkLoggerProvider.setEndpoint(testURL);
       splunkLoggerProvider.fields( extra );
 
       $httpBackend
@@ -273,10 +247,11 @@ describe('splunkLogger Module:', function() {
     });
 
     it( '$log has a splunkSender attached', function() {
-      var testURL = 'https://logs-01.splunk.com/inputs/test123456/tag/AngularJS/';
+      var testURL = 'https://splunk.logger.test.url/test';
       var payload, expectMessage;
 
       splunkLoggerProvider.inputToken( token );
+      splunkLoggerProvider.setEndpoint(testURL);
       splunkLoggerProvider.includeUrl( false );
 
       angular.forEach( levels, function (level) {
@@ -319,6 +294,7 @@ describe('splunkLogger Module:', function() {
       var tag = 'splunkLogger';
 
       splunkLoggerProvider.inputToken(token);
+      splunkLoggerProvider.setEndpoint(url);
       splunkLoggerProvider.includeUrl(false);
       splunkLoggerProvider.loggingEnabled(false);
       splunkLoggerProvider.inputTag(tag);
@@ -337,10 +313,11 @@ describe('splunkLogger Module:', function() {
 
     it( 'will disable logs after config had them enabled and not send messages', function() {
       var tag = 'splunkLogger';
-      var testURL = 'https://logs-01.splunk.com/inputs/test123456/tag/splunkLogger/';
+      var testURL = 'https://splunk.logger.test.url/test';
       var generatedURL;
 
       splunkLoggerProvider.inputToken(token);
+      splunkLoggerProvider.setEndpoint(testURL);
       splunkLoggerProvider.includeUrl(false);
       splunkLoggerProvider.loggingEnabled(true);
       splunkLoggerProvider.inputTag(tag);
@@ -378,9 +355,10 @@ describe('splunkLogger Module:', function() {
 
     it('will override labels as specified', function () {
       var expectMessage = { msg: message.message };
-      var testURL = 'https://logs-01.splunk.com/inputs/test123456/tag/AngularJS/';
+      var testURL = 'https://splunk.logger.test.url/test';
 
       splunkLoggerProvider.inputToken( token );
+      splunkLoggerProvider.setEndpoint(testURL);
       splunkLoggerProvider.labels({
         message: 'msg'
       });
@@ -400,9 +378,10 @@ describe('splunkLogger Module:', function() {
     it('should log console errors if sendConsoleErrors() is not false', function() {
       var error = new Error("some error");
       var expectMessage = {level: 'ERROR', message: error.message, line: 1, col: 2, stack: error.stack};
-      var testURL = 'https://logs-01.splunk.com/inputs/test123456/tag/AngularJS/';
+      var testURL = 'https://splunk.logger.test.url/test';
 
       splunkLoggerProvider.inputToken(token);
+      splunkLoggerProvider.setEndpoint(testURL);
 
       $httpBackend
         .expectPOST(testURL, expectMessage)

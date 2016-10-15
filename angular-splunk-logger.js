@@ -30,14 +30,15 @@
       var token = null;
       var endpoint = null;
 
-      this.endpoint = function(e) {
+      var setEndpoint = function(e) {
         if (angular.isDefined(e)) {
           endpoint = e;
           return self;
         }
 
         return endpoint;
-      }
+      };
+      this.setEndpoint = setEndpoint;
 
       this.setExtra = function(d) {
         extra = d;
@@ -62,7 +63,7 @@
         return labels;
       };
 
-      this.inputToken = function ( s ) {
+      var inputToken = function ( s ) {
         if (angular.isDefined(s)) {
           token = s;
           return self;
@@ -70,15 +71,7 @@
 
         return token;
       };
-
-      this.useHttps = function (flag) {
-        if (angular.isDefined(flag)) {
-          https = !!flag;
-          return self;
-        }
-
-        return https;
-      };
+      this.inputToken = inputToken;
 
       this.includeUrl = function (flag) {
         if (angular.isDefined(flag)) {
@@ -176,7 +169,7 @@
          */
         var sendMessage = function (data) {
           //If a token is not configured, don't do anything.
-          if (!token || !loggingEnabled) {
+          if (!token || !endpoint || !loggingEnabled) {
             return;
           }
 
@@ -207,7 +200,7 @@
           var config = {
             headers: {
              //'Content-Type': 'text/plain'
-              'Authorization': 'Splunk ' + this.token
+              'Authorization': 'Splunk ' + token
             },
             responseType: 'json'
           };
@@ -221,18 +214,10 @@
           }
 
           //Ajax call to send data to splunk
-          $http.post(this.endpoint, sentData, config);
+          $http.post(endpoint, sentData, config);
         };
 
         var attach = function() {
-        };
-
-        var inputToken = function(s) {
-          if (angular.isDefined(s)) {
-            token = s;
-          }
-
-          return token;
         };
 
         return {
@@ -245,6 +230,7 @@
           sendMessage: sendMessage,
           logToConsole: logToConsole,
           inputToken: inputToken,
+          setEndpoint: setEndpoint,
 
           /**
            * Get or set the fields to be sent with all logged events.
