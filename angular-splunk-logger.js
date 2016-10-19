@@ -2,6 +2,15 @@
  *  splunkLogger is a module which will send your log messages to a configured
  *  [Splunk](http://splunk.com) server.
  *
+ *  splunk json log format
+ *  {
+ *    "time": 1426279439, // epoch time
+ *    "host": "localhost",
+ *    "source": "datasource",
+ *    "sourcetype": "txt",
+ *    "index": "main",
+ *    "event": { "Hello world!" }
+ *  }
  *  This is based on https://github.com/ajbrown/angular-loggly-logger by ajbrown
  */
 ; (function( angular ) {
@@ -16,7 +25,7 @@
       //var https = true;
       var extra = {};
       var includeCurrentUrl = false;
-      var includeTimestamp = false;
+      var includeTimestamp = true;
       var includeUserAgent = false;
       var tag = null;
       var sendConsoleErrors = false;
@@ -181,6 +190,7 @@
 
           lastLog = new Date();
 
+          var splunkEvent = {};
           var sentData = angular.extend({}, extra, data);
 
           if (includeCurrentUrl) {
@@ -188,7 +198,7 @@
           }
 
           if( includeTimestamp ) {
-            sentData.timestamp = lastLog.toISOString();
+            splunkEvent.time = (lastLog.getTime() / 1000);
           }
 
           if( includeUserAgent ) {
@@ -213,8 +223,10 @@
             }
           }
 
+          splunkEvent.event = sentData;
+
           //Ajax call to send data to splunk
-          $http.post(endpoint, sentData, config);
+          $http.post(endpoint, splunkEvent, config);
         };
 
         var attach = function() {

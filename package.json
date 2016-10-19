@@ -38,7 +38,7 @@
     "shelljs": "^0.2.6"
   },
   "scripts": {
-    "start": "http-server -p 8000",
+    "start": "http-server -p 8001",
     "update-webdriver": "webdriver-manager update",
     "test": "grunt karma:unit",
     "test-single-run": "grunt karma:travis:run",

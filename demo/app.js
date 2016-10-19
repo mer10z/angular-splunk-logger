@@ -3,15 +3,18 @@
     angular.module( 'splunkLogger.demo', ['splunkLogger'] )
 
     .constant(
-        'splunkInputToken', ''
+        'splunkInputToken', 'xyz'
+    )
+    .constant(
+        'splunkEndpoint', 'http://localhost:8088/services/collector/event'
     )
 
-    .config( function( SplunkLoggerProvider, splunkInputToken ) {
+    .config( function( SplunkLoggerProvider, splunkInputToken, splunkEndpoint ) {
 
         SplunkLoggerProvider
             .inputToken( splunkInputToken )
-            .useHttps( true )
-            .includeTimestamp( true )
+            .setEndpoint( splunkEndpoint )
+            .includeTimestamp( false )
             .includeUrl( true )
             .sendConsoleErrors( true )
             .logToConsole( true )
