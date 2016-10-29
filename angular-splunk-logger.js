@@ -2,15 +2,6 @@
  *  splunkLogger is a module which will send your log messages to a configured
  *  [Splunk](http://splunk.com) server.
  *
- *  splunk json log format
- *  {
- *    "time": 1426279439, // epoch time
- *    "host": "localhost",
- *    "source": "datasource",
- *    "sourcetype": "txt",
- *    "index": "main",
- *    "event": { "Hello world!" }
- *  }
  *  This is based on https://github.com/ajbrown/angular-loggly-logger by ajbrown
  */
 ; (function( angular ) {
@@ -20,153 +11,162 @@
     .provider( 'SplunkLogger', function() {
       var self = this;
 
-      var logLevels = [ 'DEBUG', 'INFO', 'WARN', 'ERROR' ];
+      var _logLevels = [ 'DEBUG', 'INFO', 'WARN', 'ERROR' ];
 
-      //var https = true;
-      var extra = {};
-      var includeCurrentUrl = false;
-      var includeTimestamp = true;
-      var includeUserAgent = false;
-      var tag = null;
-      var sendConsoleErrors = false;
-      var logToConsole = true;
-      var loggingEnabled = true;
-      var labels = {};
+      var _fields = {};
+      var _includeCurrentUrl = false;
+      var _includeTimestamp = false;
+      var _includeUserAgent = false;
+      var _tag = null;
+      var _sendConsoleErrors = false;
+      var _logToConsole = true;
+      var _loggingEnabled = true;
+      var _labels = {};
 
       // The minimum level of messages that should be sent to splunk.
-      var level = 0;
+      var _level = 0;
 
-      var token = null;
-      var endpoint = null;
+      var _token = null;
+      var _endpoint = null;
 
-      var setEndpoint = function(e) {
+      // configuration methods for this provider
+      this.endpoint = endpoint;
+      this.token = token;
+      this.fields = fields;
+      this.labels = labels;
+      this.includeUrl = includeUrl;
+      this.includeTimestamp = includeTimestamp;
+      this.includeUserAgent = includeUserAgent;
+      this.inputTag = inputTag;
+      this.sendConsoleErrors = sendConsoleErrors;
+      this.level = level;
+      this.loggingEnabled = loggingEnabled;
+      this.isLevelEnabled = isLevelEnabled;
+      this.logToConsole = logToConsole;
+
+      function endpoint(e) {
         if (angular.isDefined(e)) {
-          endpoint = e;
+          _endpoint = e;
           return self;
         }
 
-        return endpoint;
-      };
-      this.setEndpoint = setEndpoint;
+        return _endpoint;
+      }
 
-      this.setExtra = function(d) {
-        extra = d;
-        return self;
-      };
-
-      this.fields = function(d) {
-        if (angular.isDefined(d) ) {
-          extra = d;
-          return self;
-        }
-
-        return extra;
-      };
-
-      this.labels = function(l) {
-        if (angular.isObject(l)) {
-          labels = l;
-          return self;
-        }
-
-        return labels;
-      };
-
-      var inputToken = function ( s ) {
+      function token( s ) {
         if (angular.isDefined(s)) {
-          token = s;
+          _token = s;
           return self;
         }
 
-        return token;
-      };
-      this.inputToken = inputToken;
+        return _token;
+      }
 
-      this.includeUrl = function (flag) {
+      function fields(d) {
+        if (angular.isDefined(d) ) {
+          _fields = d;
+          return self;
+        }
+
+        return _fields;
+      }
+
+      function labels(l) {
+        if (angular.isObject(l)) {
+          _labels = l;
+          return self;
+        }
+
+        return _labels;
+      }
+
+      function includeUrl(flag) {
         if (angular.isDefined(flag)) {
-          includeCurrentUrl = !!flag;
+          _includeCurrentUrl = !!flag;
           return self;
         }
 
-        return includeCurrentUrl;
-      };
+        return _includeCurrentUrl;
+      }
 
-      this.includeTimestamp = function (flag) {
+      function includeTimestamp(flag) {
         if (angular.isDefined(flag)) {
-          includeTimestamp = !!flag;
+          _includeTimestamp = !!flag;
           return self;
         }
 
-        return includeTimestamp;
-      };
+        return _includeTimestamp;
+      }
 
-      this.includeUserAgent = function (flag) {
+      function includeUserAgent(flag) {
         if (angular.isDefined(flag)) {
-          includeUserAgent = !!flag;
+          _includeUserAgent = !!flag;
           return self;
         }
 
-        return includeUserAgent;
-      };
+        return _includeUserAgent;
+      }
 
-      this.inputTag = function (usrTag){
+      function inputTag(usrTag){
         if (angular.isDefined(usrTag)) {
-          tag = usrTag;
+          _tag = usrTag;
           return self;
         }
 
-        return tag;
-      };
+        return _tag;
+      }
 
-      this.sendConsoleErrors = function (flag){
+      function sendConsoleErrors(flag){
         if (angular.isDefined(flag)) {
-          sendConsoleErrors = !!flag;
+          _sendConsoleErrors = !!flag;
           return self;
         }
 
-        return sendConsoleErrors;
-      };
+        return _sendConsoleErrors;
+      }
 
-      this.level = function (name) {
+      function level(name) {
 
         if (angular.isDefined(name)) {
-          var newLevel = logLevels.indexOf( name.toUpperCase() );
+          var newLevel = _logLevels.indexOf( name.toUpperCase() );
 
           if (newLevel < 0) {
             throw "Invalid logging level specified: " + name;
           } else {
-            level = newLevel;
+            _level = newLevel;
           }
 
           return self;
         }
 
-        return logLevels[level];
-      };
+        return _logLevels[_level];
+      }
 
-      this.isLevelEnabled = function(name) {
-        return logLevels.indexOf(name.toUpperCase()) >= level;
-      };
+      function isLevelEnabled(name) {
+        return _logLevels.indexOf(name.toUpperCase()) >= _level;
+      }
 
-      this.loggingEnabled = function(flag) {
+      function loggingEnabled(flag) {
         if (angular.isDefined(flag)) {
-          loggingEnabled = !!flag;
+          _loggingEnabled = !!flag;
           return self;
         }
 
-        return loggingEnabled;
-      };
+        return _loggingEnabled;
+      }
 
-
-      this.logToConsole = function(flag) {
+      function logToConsole(flag) {
         if (angular.isDefined(flag)) {
-          logToConsole = !!flag;
+          _logToConsole = !!flag;
           return self;
         }
 
-        return logToConsole;
-      };
+        return _logToConsole;
+      }
 
+      //
+      // SplunkLogger object to be used in application
+      //
       this.$get = [ '$injector', function ($injector) {
 
         var lastLog = null;
@@ -178,7 +178,7 @@
          */
         var sendMessage = function (data) {
           //If a token is not configured, don't do anything.
-          if (!token || !endpoint || !loggingEnabled) {
+          if (!_token || !_endpoint || !_loggingEnabled) {
             return;
           }
 
@@ -191,42 +191,40 @@
           lastLog = new Date();
 
           var splunkEvent = {};
-          var sentData = angular.extend({}, extra, data);
+          var eventData = angular.extend({}, _fields, data);
 
-          if (includeCurrentUrl) {
-            sentData.url = $location.absUrl();
+          if (_includeCurrentUrl) {
+            eventData.url = $location.absUrl();
           }
 
-          if( includeTimestamp ) {
+          if( _includeTimestamp ) {
             splunkEvent.time = (lastLog.getTime() / 1000);
           }
 
-          if( includeUserAgent ) {
-            sentData.userAgent = $window.navigator.userAgent;
+          if( _includeUserAgent ) {
+            eventData.userAgent = $window.navigator.userAgent;
           }
 
-          //Splunk's API doesn't send us cross-domain headers, so we can't interact directly
-           //Set header
+          //Set header for splunk
           var config = {
             headers: {
-             //'Content-Type': 'text/plain'
-              'Authorization': 'Splunk ' + token
+              'Authorization': 'Splunk ' + _token
             },
             responseType: 'json'
           };
 
-          // Apply labels
-          for (var label in labels) {
-            if (label in sentData) {
-              sentData[labels[label]] = sentData[label];
-              delete sentData[label];
+          // Apply labels overrides if the exist
+          for (var label in _labels) {
+            if (label in eventData) {
+              eventData[_labels[label]] = eventData[label];
+              delete eventData[label];
             }
           }
 
-          splunkEvent.event = sentData;
+          splunkEvent.event = eventData;
 
           //Ajax call to send data to splunk
-          $http.post(endpoint, splunkEvent, config);
+          $http.post(_endpoint, splunkEvent, config);
         };
 
         var attach = function() {
@@ -234,27 +232,16 @@
 
         return {
           lastLog: function(){ return lastLog; },
-          sendConsoleErrors: function(){ return sendConsoleErrors; },
-          level : function() { return level; },
-          loggingEnabled: self.loggingEnabled,
-          isLevelEnabled : self.isLevelEnabled,
+          sendConsoleErrors: function(){ return _sendConsoleErrors; },
+          level : function() { return _level; },
+          loggingEnabled: loggingEnabled,
+          isLevelEnabled : isLevelEnabled,
           attach: attach,
           sendMessage: sendMessage,
           logToConsole: logToConsole,
-          inputToken: inputToken,
-          setEndpoint: setEndpoint,
-
-          /**
-           * Get or set the fields to be sent with all logged events.
-           * @param d
-           * @returns {*}
-           */
-          fields: function( d ) {
-            if( angular.isDefined( d ) ) {
-              self.fields( d );
-            }
-            return self.fields();
-          }
+          token: token,
+          endpoint: endpoint,
+          fields: fields
         };
       }];
 
@@ -293,7 +280,7 @@
           var wrappedFn = function () {
             var args = Array.prototype.slice.call(arguments);
 
-            if(logger.logToConsole) {
+            if(logger._logToConsole) {
               logFn.apply(null, args);
             }
 

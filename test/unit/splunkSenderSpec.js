@@ -101,13 +101,13 @@ describe('splunkLogger Module:', function() {
     });
 
     it('will send a message to splunk only when properly configured', function () {
-      var expectMessage = { message: 'A test message' };
+      var expectMessage = { event: {message: 'A test message' } };
       var tag = 'splunkLogger';
       var testURL = 'https://splunk.logger.test.url/test';
       var generatedURL;
 
-      splunkLoggerProvider.inputToken(token);
-      splunkLoggerProvider.setEndpoint(testURL);
+      splunkLoggerProvider.token(token);
+      splunkLoggerProvider.endpoint(testURL);
       splunkLoggerProvider.includeUrl(false);
       splunkLoggerProvider.inputTag(tag);
 
@@ -127,7 +127,7 @@ describe('splunkLogger Module:', function() {
     });
 
     it('will include the current url if includeUrl() is not set to false', function () {
-      var expectMessage = angular.extend(message, { url: 'http://bsplunk.com' });
+      var expectMessage = { event: angular.extend(message, { url: 'http://bsplunk.com' }) };
       var testURL = 'https://splunk.logger.test.url/test';
       var payload;
 
@@ -136,8 +136,8 @@ describe('splunkLogger Module:', function() {
         $injector.get('$browser').url('http://bsplunk.com');
       });
 
-      splunkLoggerProvider.inputToken( token );
-      splunkLoggerProvider.setEndpoint(testURL);
+      splunkLoggerProvider.token( token );
+      splunkLoggerProvider.endpoint(testURL);
       splunkLoggerProvider.includeUrl( true );
 
       $httpBackend
@@ -150,17 +150,17 @@ describe('splunkLogger Module:', function() {
       service.sendMessage( message );
 
       $httpBackend.flush();
-      expect(payload.url).toEqual('http://bsplunk.com');
+      expect(payload.event.url).toEqual('http://bsplunk.com');
 
     });
 
     it('will include the current userAgent if includeUserAgent() is not set to false', function () {
-      var expectMessage = angular.extend(message, { userAgent: window.navigator.userAgent });
+      var expectMessage = { event: angular.extend(message, { userAgent: window.navigator.userAgent }) };
       var testURL = 'https://splunk.logger.test.url/test';
       var payload;
 
-      splunkLoggerProvider.inputToken( token );
-      splunkLoggerProvider.setEndpoint(testURL);
+      splunkLoggerProvider.token( token );
+      splunkLoggerProvider.endpoint(testURL);
       splunkLoggerProvider.includeUserAgent( true );
 
       $httpBackend
@@ -173,14 +173,14 @@ describe('splunkLogger Module:', function() {
       service.sendMessage( message );
 
       $httpBackend.flush();
-      expect(payload.userAgent).toEqual(window.navigator.userAgent);
+      expect(payload.event.userAgent).toEqual(window.navigator.userAgent);
 
     });
 
     it( 'can set extra fields using the fields method', function() {
       var extra = { appVersion: '1.1.0', browser: 'Chrome' };
 
-      expect( service.fields( extra )).toBe( extra );
+      service.fields( extra );
       expect( service.fields() ).toEqual( extra );
     });
 
@@ -188,11 +188,11 @@ describe('splunkLogger Module:', function() {
     it( 'will include extra fields if set via provider and service', function() {
       var payload, payload2;
       var extra = { appVersion: '1.1.0', browser: 'Chrome' };
-      var expectMessage = angular.extend(message, extra);
+      var expectMessage = { event:angular.extend(message, extra) };
       var testURL = 'https://splunk.logger.test.url/test';
 
-      splunkLoggerProvider.inputToken( token );
-      splunkLoggerProvider.setEndpoint(testURL);
+      splunkLoggerProvider.token( token );
+      splunkLoggerProvider.endpoint(testURL);
 
 
       splunkLoggerProvider.fields( extra );
@@ -207,7 +207,7 @@ describe('splunkLogger Module:', function() {
       $httpBackend.flush();
       expect(payload).toEqual(expectMessage);
 
-      var expectMessage2 = angular.extend(message, { appVersion: '1.1.0', browser: 'Chrome', username: 'baldrin' });
+      var expectMessage2 = { event: angular.extend(message, { appVersion: '1.1.0', browser: 'Chrome', username: 'baldrin' }) };
 
       extra.username = "baldrin";
       service.fields( extra );
@@ -227,10 +227,10 @@ describe('splunkLogger Module:', function() {
       var payload;
       var testURL = 'https://splunk.logger.test.url/test';
       var extra = { appVersion: '1.1.0', browser: 'Chrome' };
-      var expectMessage = angular.extend(message, extra);
+      var expectMessage = {event: angular.extend(message, extra) };
 
-      splunkLoggerProvider.inputToken( token );
-      splunkLoggerProvider.setEndpoint(testURL);
+      splunkLoggerProvider.token( token );
+      splunkLoggerProvider.endpoint(testURL);
       splunkLoggerProvider.fields( extra );
 
       $httpBackend
@@ -250,12 +250,12 @@ describe('splunkLogger Module:', function() {
       var testURL = 'https://splunk.logger.test.url/test';
       var payload, expectMessage;
 
-      splunkLoggerProvider.inputToken( token );
-      splunkLoggerProvider.setEndpoint(testURL);
-      splunkLoggerProvider.includeUrl( false );
+      splunkLoggerProvider.token(token);
+      splunkLoggerProvider.endpoint(testURL);
+      splunkLoggerProvider.includeUrl(false);
 
-      angular.forEach( levels, function (level) {
-        expectMessage = angular.extend(message, { level: level });
+      angular.forEach(levels, function (level) {
+        expectMessage = { event: angular.extend(message, { level: level }) };
         $httpBackend
           .expectPOST(testURL, expectMessage)
           .respond(function (method, url, data) {
@@ -264,7 +264,7 @@ describe('splunkLogger Module:', function() {
           });
         $log[level.toLowerCase()].call($log, message);
         $httpBackend.flush();
-        expect(payload.level).toEqual(level);
+        expect(payload.event.level).toEqual(level);
       });
     });
 
@@ -293,8 +293,8 @@ describe('splunkLogger Module:', function() {
       var url = 'https://logs-01.splunk.com/inputs/' + token;
       var tag = 'splunkLogger';
 
-      splunkLoggerProvider.inputToken(token);
-      splunkLoggerProvider.setEndpoint(url);
+      splunkLoggerProvider.token(token);
+      splunkLoggerProvider.endpoint(url);
       splunkLoggerProvider.includeUrl(false);
       splunkLoggerProvider.loggingEnabled(false);
       splunkLoggerProvider.inputTag(tag);
@@ -316,14 +316,14 @@ describe('splunkLogger Module:', function() {
       var testURL = 'https://splunk.logger.test.url/test';
       var generatedURL;
 
-      splunkLoggerProvider.inputToken(token);
-      splunkLoggerProvider.setEndpoint(testURL);
+      splunkLoggerProvider.token(token);
+      splunkLoggerProvider.endpoint(testURL);
       splunkLoggerProvider.includeUrl(false);
       splunkLoggerProvider.loggingEnabled(true);
       splunkLoggerProvider.inputTag(tag);
 
       $httpBackend
-        .expectPOST(testURL, message)
+        .expectPOST(testURL, {event: message})
         .respond(function (method, url, data) {
           generatedURL = url;
           return [200, "", {}];
@@ -348,17 +348,17 @@ describe('splunkLogger Module:', function() {
     });
 
     it( 'can update the Splunk token', function() {
-      splunkLoggerProvider.inputToken('');
-      service.inputToken('foo');
-      expect(splunkLoggerProvider.inputToken()).toEqual('foo');
+      splunkLoggerProvider.token('');
+      service.token('foo');
+      expect(splunkLoggerProvider.token()).toEqual('foo');
     });
 
     it('will override labels as specified', function () {
-      var expectMessage = { msg: message.message };
+      var expectMessage = { event: { msg: message.message } };
       var testURL = 'https://splunk.logger.test.url/test';
 
-      splunkLoggerProvider.inputToken( token );
-      splunkLoggerProvider.setEndpoint(testURL);
+      splunkLoggerProvider.token( token );
+      splunkLoggerProvider.endpoint(testURL);
       splunkLoggerProvider.labels({
         message: 'msg'
       });
@@ -377,11 +377,11 @@ describe('splunkLogger Module:', function() {
 
     it('should log console errors if sendConsoleErrors() is not false', function() {
       var error = new Error("some error");
-      var expectMessage = {level: 'ERROR', message: error.message, line: 1, col: 2, stack: error.stack};
+      var expectMessage = { event: {level: 'ERROR', message: error.message, line: 1, col: 2, stack: error.stack} };
       var testURL = 'https://splunk.logger.test.url/test';
 
-      splunkLoggerProvider.inputToken(token);
-      splunkLoggerProvider.setEndpoint(testURL);
+      splunkLoggerProvider.token(token);
+      splunkLoggerProvider.endpoint(testURL);
 
       $httpBackend
         .expectPOST(testURL, expectMessage)
