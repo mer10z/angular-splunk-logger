@@ -1,6 +1,5 @@
 [![Build Status](https://travis-ci.org/mer10z/angular-splunk-logger.svg)](https://travis-ci.org/mer10z/angular-splunk-logger)
-[![Coverage Status](https://coveralls.io/repos/mer10z/angular-splunk-logger/badge.svg?branch=master)](https://coveralls.io/r/mer10z/angular-splunk-logger?branch=master)
-[![Join the chat at https://gitter.im/mer10z/angular-splunk-logger](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/mer10z/angular-splunk-logger?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Coverage Status](https://coveralls.io/repos/github/mer10z/angular-splunk-logger/badge.svg?branch=master)](https://coveralls.io/github/mer10z/angular-splunk-logger?branch=master)
 
 ### WORK IN PROGRESS NOT YET TESTED PROBABLY DOESN'T WORK MIGHT CRASH YOUR SERVER DON'T USE
 
