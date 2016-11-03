@@ -30,15 +30,15 @@ log while custom JSON objects are sent via "json.messageObj" field as Splunk
 only supports one type per field.
 
 To use both the decorated $log and the SplunkLogger service, you must first
-configure it with an inputToken and setEndpoint, which is done via the
+configure it with a token and endpoint, which is done via the
 SplunkLoggerProvider:
 
 ```javascript
 angular.module( 'myApp', [require('angular-splunk-logger')] )
 
   .config(["SplunkLoggerProvider", function( SplunkLoggerProvider ) {
-    SplunkLoggerProvider.inputToken( '<splunk input token here>' );
-    SplunkLoggerProvider.setEndpoint( '<splunk event collector url here>' );
+    SplunkLoggerProvider.token( '<splunk input token here>' );
+    SplunkLoggerProvider.endpoint( '<splunk event collector url here>' );
   } ]);
 
   .run(["SplunkLogger", "$log", function( SplunkLogger, $log ) {
@@ -60,26 +60,30 @@ When sent through the `$log` decorator, messages will be formatted as follows:
 
 // Example: $log.warn( 'Danger! Danger!' );
 {
-  level: "WARN",
-  timestamp: "2014-05-01T13:10Z",
-  msg: "Danger! Danger!",
-  url: "https://github.com/mer10z/angular-splunk-logger/demo/index.html",
+  event: {
+    level: "WARN",
+    timestamp: "2014-05-01T13:10Z",
+    msg: "Danger! Danger!",
+    url: "https://github.com/mer10z/angular-splunk-logger/demo/index.html",
+  }
 }
 
 // Example: $log.debug( 'User submitted something:', { foo: 'A.J', bar: 'Space' } )
 
 {
-  level: "DEBUG",
-  timestamp: "2014-05-01T13:18Z",
-  msg: ["User submitted something", { foo: 'A.J.', bar: 'Space' }],
-  url: "https://github.com/mer10z/angular-splunk-logger/demo/index.html",
+  event: {
+    level: "DEBUG",
+    timestamp: "2014-05-01T13:18Z",
+    msg: ["User submitted something", { foo: 'A.J.', bar: 'Space' }],
+    url: "https://github.com/mer10z/angular-splunk-logger/demo/index.html",
+  }
 }
 ```
 
 > However, 'url' and 'timestamp' are not included by default.  You must enable those options in your application config (see below).
 
 
-Note that if you do not call `SplunkLoggerProvider.inputToken()` in a config method, messages will not be sent to splunk.  At the moment, there is no warning -- your message is just ignored.
+Note that if you do not call `SplunkLoggerProvider.token()` and `SplunkLoggerProvider.endpoint()` in a config method, messages will not be sent to splunk.  At the moment, there is no warning -- your message is just ignored.
 
 ### Configuration
 
@@ -93,13 +97,13 @@ The following configuration options are available.
     // which will send all log messages.
     .level( 'DEBUG' )
 
-    // set the token of the splunk input to use.  Must be set, or no logs
+    // set the token for the splunk http collector to use.  Must be set, or no logs
     // will be sent.
-    .inputToken( '<your-token>' )
-
-    // set whether or not HTTPS should be used for sending messages.  Default
-    // is true
-    .useHttps( true )
+    .token( '<your-token>' )
+    
+    // set the endpoint of the splunk http collector to use.  Must be set, or no logs
+    // will be sent.
+    .token( '<your-token>' )
 
     // should the value of $location.absUrl() be sent as a "url" key in the
     // message object that's sent to splunk?  Default is false.
@@ -109,7 +113,9 @@ The following configuration options are available.
     // message object that's sent to splunk?  Default is false.
     .includeUserAgent( false )
 
-    // should the current timestamp be included? Default is false.
+    // should the current timestamp be included? Default is false. Note that this will be
+    // the clients time, so if you have users in different time zones this could make your
+    // logs wonky. You should probably leave it false and let Splunk set the timestamp
     .includeTimestamp( false )
 
     // set comma-seperated tags that should be included with the log events.
@@ -155,7 +161,7 @@ will include the key/values provided with all messages, plus the data to be sent
 
   $log.warn( 'Danger! Danger!' )
 
-  >> { appVersion: 1.1.0, browser: 'Chrome', level: 'WARN', message: 'Danger! Danger', url: 'http://google.com' }
+  >> { event: { appVersion: 1.1.0, browser: 'Chrome', level: 'WARN', message: 'Danger! Danger', url: 'http://google.com' } }
 ```
 
 Extra fields can also be added at runtime using the `SplunkLogger` service:
@@ -169,7 +175,7 @@ Extra fields can also be added at runtime using the `SplunkLogger` service:
 
     $log.info( 'All is good!' );
 
-  >> { appVersion: 1.1.0, browser: 'Chrome', username: 'foobar', level: 'WARN', message: 'All is good', url: 'http://google.com' }
+  >> { event: { appVersion: 1.1.0, browser: 'Chrome', username: 'foobar', level: 'WARN', message: 'All is good', url: 'http://google.com' } }
   }])
 
 ```
@@ -178,9 +184,7 @@ Extra fields can also be added at runtime using the `SplunkLogger` service:
 Beware that when using `setExtra` with `SplunkLogger.sendMessage( obj )`, any properties in your `obj` that are the same as your `extra` will be overwritten.  
 
 ## ChangeLog
-- v0.2.2 - Fixes preflight cross origin issues.
-- v0.2.3 - Fixes npm install issues related to Bower.
-- v0.2.4 - Adds customizable labels, error stacktraces, and user-agent logging.
+- v0.2.5 - first release after forking from angular-loggly-logger
 
 
 ## Contributing
