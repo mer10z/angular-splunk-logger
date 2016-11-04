@@ -210,7 +210,8 @@
             headers: {
               'Authorization': 'Splunk ' + _token
             },
-            responseType: 'json'
+            responseType: 'json',
+            withCredentials: false
           };
 
           // Apply labels overrides if the exist
