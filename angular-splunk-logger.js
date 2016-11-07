@@ -22,6 +22,7 @@
       var _logToConsole = true;
       var _loggingEnabled = true;
       var _labels = {};
+      var _source = null;
 
       // The minimum level of messages that should be sent to splunk.
       var _level = 0;
@@ -32,6 +33,7 @@
       // configuration methods for this provider
       this.endpoint = endpoint;
       this.token = token;
+      this.source = source;
       this.fields = fields;
       this.labels = labels;
       this.includeUrl = includeUrl;
@@ -53,13 +55,22 @@
         return _endpoint;
       }
 
-      function token( s ) {
-        if (angular.isDefined(s)) {
-          _token = s;
+      function token(t) {
+        if (angular.isDefined(t)) {
+          _token = t;
           return self;
         }
 
         return _token;
+      }
+
+      function source(s) {
+        if (angular.isDefined(s)) {
+          _source = s;
+          return self;
+        }
+
+        return _source;
       }
 
       function fields(d) {
@@ -171,7 +182,6 @@
 
         var lastLog = null;
 
-
         /**
          * Send the specified data to splunk as a json message.
          * @param data
@@ -182,28 +192,53 @@
             return;
           }
 
-          //TODO we're injecting this here to resolve circular dependency issues.  Is this safe?
-          var $window = $injector.get( '$window' );
-          var $location = $injector.get( '$location' );
+          // Create the event based on configuration
+          function createSplunkEvent(data) {
+            //TODO we're injecting this here to resolve circular dependency issues.  Is this safe?
+            var $window = $injector.get( '$window' );
+            var $location = $injector.get( '$location' );
+
+            var splunkEvent = {};
+
+            // these are native splunk event fields
+            if (_source) {
+              splunkEvent.source = _source;
+            }
+
+            if( _includeTimestamp ) {
+              splunkEvent.time = (lastLog.getTime() / 1000);
+            }
+
+            // this is our custom event object
+            var eventData = angular.extend({}, _fields, data);
+
+            if (_includeCurrentUrl) {
+              eventData.url = $location.absUrl();
+            }
+
+            if( _includeUserAgent ) {
+              eventData.userAgent = $window.navigator.userAgent;
+            }
+
+            // Apply labels overrides if the exist
+            for (var label in _labels) {
+              if (label in eventData) {
+                eventData[_labels[label]] = eventData[label];
+                delete eventData[label];
+              }
+            }
+
+            splunkEvent.event = eventData;
+
+            return splunkEvent;
+          }
+
           //we're injecting $http
           var $http = $injector.get( '$http' );
 
           lastLog = new Date();
 
-          var splunkEvent = {};
-          var eventData = angular.extend({}, _fields, data);
-
-          if (_includeCurrentUrl) {
-            eventData.url = $location.absUrl();
-          }
-
-          if( _includeTimestamp ) {
-            splunkEvent.time = (lastLog.getTime() / 1000);
-          }
-
-          if( _includeUserAgent ) {
-            eventData.userAgent = $window.navigator.userAgent;
-          }
+          var splunkEvent = createSplunkEvent(data);
 
           //Set header for splunk
           var config = {
@@ -213,16 +248,6 @@
             responseType: 'json',
             withCredentials: false
           };
-
-          // Apply labels overrides if the exist
-          for (var label in _labels) {
-            if (label in eventData) {
-              eventData[_labels[label]] = eventData[label];
-              delete eventData[label];
-            }
-          }
-
-          splunkEvent.event = eventData;
 
           //Ajax call to send data to splunk
           $http.post(_endpoint, splunkEvent, config);

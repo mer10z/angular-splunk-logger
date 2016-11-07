@@ -177,6 +177,52 @@ describe('splunkLogger Module:', function() {
 
     });
 
+    it('will include source if set', function () {
+      var expectMessage = { event: message, source: "TestSource" };
+      var testURL = 'https://splunk.logger.test.url/test';
+      var payload;
+
+      splunkLoggerProvider.token(token);
+      splunkLoggerProvider.endpoint(testURL);
+      splunkLoggerProvider.source("TestSource");
+
+      $httpBackend
+        .expectPOST(testURL, expectMessage)
+        .respond(function (method, url, data) {
+          payload = JSON.parse(data);
+          return [200, "", {}];
+        });
+
+      service.sendMessage( message );
+
+      $httpBackend.flush();
+      expect(payload.source).toEqual("TestSource");
+
+    });
+
+    it('will include timestamp if set', function () {
+      var expectMessage = { event: message, source: "TestSource" };
+      var testURL = 'https://splunk.logger.test.url/test';
+      var payload;
+
+      splunkLoggerProvider.token(token)
+        .endpoint(testURL)
+        .includeTimestamp(true);
+
+      $httpBackend
+        .expectPOST(testURL)
+        .respond(function (method, url, data) {
+          payload = JSON.parse(data);
+          return [200, "", {}];
+        });
+
+      service.sendMessage( message );
+
+      $httpBackend.flush();
+      expect(payload.time).toBeDefined();
+
+    });
+
     it( 'can set extra fields using the fields method', function() {
       var extra = { appVersion: '1.1.0', browser: 'Chrome' };
 
