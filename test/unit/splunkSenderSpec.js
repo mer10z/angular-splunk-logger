@@ -82,7 +82,6 @@ describe('splunkLogger Module:', function() {
         $log = $injector.get('$log');
         $httpBackend = $injector.get('$httpBackend');
         service = $injector.get('SplunkLogger');
-        service.attach();
       });
     });
 

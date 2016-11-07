@@ -139,7 +139,7 @@
       function level(name) {
 
         if (angular.isDefined(name)) {
-          var newLevel = _logLevels.indexOf( name.toUpperCase() );
+          var newLevel = _logLevels.indexOf(name.toUpperCase());
 
           if (newLevel < 0) {
             throw "Invalid logging level specified: " + name;
@@ -186,7 +186,7 @@
          * Send the specified data to splunk as a json message.
          * @param data
          */
-        var sendMessage = function (data) {
+        var sendMessage = function(data) {
           //If a token is not configured, don't do anything.
           if (!_token || !_endpoint || !_loggingEnabled) {
             return;
@@ -195,8 +195,8 @@
           // Create the event based on configuration
           function createSplunkEvent(data) {
             //TODO we're injecting this here to resolve circular dependency issues.  Is this safe?
-            var $window = $injector.get( '$window' );
-            var $location = $injector.get( '$location' );
+            var $window = $injector.get('$window');
+            var $location = $injector.get('$location');
 
             var splunkEvent = {};
 
@@ -205,7 +205,7 @@
               splunkEvent.source = _source;
             }
 
-            if( _includeTimestamp ) {
+            if (_includeTimestamp) {
               splunkEvent.time = (lastLog.getTime() / 1000);
             }
 
@@ -216,7 +216,7 @@
               eventData.url = $location.absUrl();
             }
 
-            if( _includeUserAgent ) {
+            if (_includeUserAgent) {
               eventData.userAgent = $window.navigator.userAgent;
             }
 
@@ -234,7 +234,7 @@
           }
 
           //we're injecting $http
-          var $http = $injector.get( '$http' );
+          var $http = $injector.get('$http');
 
           lastLog = new Date();
 
@@ -253,16 +253,12 @@
           $http.post(_endpoint, splunkEvent, config);
         };
 
-        var attach = function() {
-        };
-
         return {
-          lastLog: function(){ return lastLog; },
-          sendConsoleErrors: function(){ return _sendConsoleErrors; },
-          level : function() { return _level; },
+          lastLog: function() { return lastLog; },
+          sendConsoleErrors: function() { return _sendConsoleErrors; },
+          level: function() { return _level; },
           loggingEnabled: loggingEnabled,
           isLevelEnabled : isLevelEnabled,
-          attach: attach,
           sendMessage: sendMessage,
           logToConsole: logToConsole,
           token: token,
@@ -271,18 +267,19 @@
         };
       }];
 
-    } );
+    } )
+  ;
 
 
   angular.module( 'splunkLogger', ['splunkLogger.logger'] )
-    .config( [ '$provide', function( $provide ) {
+    .config( [ '$provide', function($provide) {
 
-      $provide.decorator('$log', [ "$delegate", '$injector', function ( $delegate, $injector ) {
+      $provide.decorator('$log', [ "$delegate", '$injector', function($delegate, $injector) {
 
         var logger = $injector.get('SplunkLogger');
 
         // install a window error handler
-        if(logger.sendConsoleErrors() === true) {
+        if (logger.sendConsoleErrors() === true) {
           var _onerror = window.onerror;
 
           //send console error messages to Splunk
@@ -306,21 +303,21 @@
           var wrappedFn = function () {
             var args = Array.prototype.slice.call(arguments);
 
-            if(logger._logToConsole) {
+            if (logger._logToConsole) {
               logFn.apply(null, args);
             }
 
             // Skip messages that have a level that's lower than the configured level for this logger.
-            if(!logger.loggingEnabled() || !logger.isLevelEnabled( level ) ) {
+            if (!logger.loggingEnabled() || !logger.isLevelEnabled(level)) {
               return;
             }
 
             var msg = (args.length === 1 ? args[0] : args) || {};
             var sending = { level: level };
 
-            if(angular.isDefined(msg.stack) || (angular.isDefined(msg[0]) && angular.isDefined(msg[0].stack))) {
+            if (angular.isDefined(msg.stack) || (angular.isDefined(msg[0]) && angular.isDefined(msg[0].stack))) {
               //handling console errors
-              if(logger.sendConsoleErrors() === true){
+              if (logger.sendConsoleErrors() === true) {
                 sending.message = msg.message || msg[0].message;
                 sending.stack = msg.stack || msg[0].stack;
               }
@@ -328,21 +325,21 @@
                 return;
               }
             }
-            else if(angular.isObject(msg)) {
+            else if (angular.isObject(msg)) {
               //handling JSON objects
               sending = angular.extend({}, msg, sending);
             }
-            else{
+            else {
               //sending plain text
               sending.message = msg;
             }
 
-            if( loggerName ) {
+            if (loggerName) {
               sending.logger = msg;
             }
 
             //Send the message to through the splunk sender
-            logger.sendMessage( sending );
+            logger.sendMessage(sending);
           };
 
           wrappedFn.logs = [];
@@ -359,22 +356,22 @@
           };
         })($delegate);
 
-        var getLogger = function ( name ) {
+        var getLogger = function(name) {
           return {
-            log:    wrapLogFunction( _$log.log, 'INFO', name ),
-            debug:  wrapLogFunction( _$log.debug, 'DEBUG', name ),
-            info:   wrapLogFunction( _$log.info, 'INFO', name ),
-            warn:   wrapLogFunction( _$log.warn, 'WARN', name ),
-            error:  wrapLogFunction( _$log.error, 'ERROR', name )
+            log: wrapLogFunction(_$log.log, 'INFO', name),
+            debug: wrapLogFunction(_$log.debug, 'DEBUG', name),
+            info: wrapLogFunction(_$log.info, 'INFO', name),
+            warn: wrapLogFunction(_$log.warn, 'WARN', name),
+            error: wrapLogFunction(_$log.error, 'ERROR', name)
           };
         };
 
         //wrap the existing API
-        $delegate.log =    wrapLogFunction($delegate.log, 'INFO');
-        $delegate.debug =  wrapLogFunction($delegate.debug, 'DEBUG');
-        $delegate.info =   wrapLogFunction($delegate.info, 'INFO');
-        $delegate.warn =   wrapLogFunction($delegate.warn, 'WARN');
-        $delegate.error =  wrapLogFunction($delegate.error, 'ERROR');
+        $delegate.log = wrapLogFunction($delegate.log, 'INFO');
+        $delegate.debug = wrapLogFunction($delegate.debug, 'DEBUG');
+        $delegate.info = wrapLogFunction($delegate.info, 'INFO');
+        $delegate.warn = wrapLogFunction($delegate.warn, 'WARN');
+        $delegate.error = wrapLogFunction($delegate.error, 'ERROR');
 
         //Add some methods
         $delegate.getLogger = getLogger;
@@ -382,7 +379,8 @@
         return $delegate;
       }]);
 
-    }]);
+    }])
+  ;
 
 
 
