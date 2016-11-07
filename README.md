@@ -1,8 +1,6 @@
 [![Build Status](https://travis-ci.org/mer10z/angular-splunk-logger.svg)](https://travis-ci.org/mer10z/angular-splunk-logger)
 [![Coverage Status](https://coveralls.io/repos/github/mer10z/angular-splunk-logger/badge.svg?branch=master)](https://coveralls.io/github/mer10z/angular-splunk-logger?branch=master)
 
-### WORK IN PROGRESS NOT YET TESTED PROBABLY DOESN'T WORK MIGHT CRASH YOUR SERVER DON'T USE
-
 Angular Splunk Logger is a module which will decorate Angular's $log service,
 and provide a `SplunkLogger` service which can be used to manually send messages
 of any kind to the [Splunk](https://www.splunk.com) cloud log management service.
@@ -100,10 +98,13 @@ The following configuration options are available.
     // set the token for the splunk http collector to use.  Must be set, or no logs
     // will be sent.
     .token( '<your-token>' )
-    
+
     // set the endpoint of the splunk http collector to use.  Must be set, or no logs
     // will be sent.
     .token( '<your-token>' )
+
+    // set the source name for the splunk log message
+    .source( '<your-source-name>' )
 
     // should the value of $location.absUrl() be sent as a "url" key in the
     // message object that's sent to splunk?  Default is false.
@@ -120,7 +121,7 @@ The following configuration options are available.
 
     // set comma-seperated tags that should be included with the log events.
     // Default is "angular"
-    .inputTag("angular,customTag")
+    .inputTag( "angular,customTag" )
 
     // Send console error stack traces to Splunk.  Default is false.
     .sendConsoleErrors( false )
