@@ -125,6 +125,33 @@ describe('splunkLogger Module:', function() {
       expect(generatedURL).toEqual(testURL);
     });
 
+    it('will stop logging if errors pass threshold', function () {
+      var expectMessage = { event: {message: 'A test message' } };
+      var tag = 'splunkLogger';
+      var testURL = 'https://splunk.logger.test.url/test';
+      var generatedURL;
+
+      splunkLoggerProvider.token(token);
+      splunkLoggerProvider.endpoint(testURL);
+      splunkLoggerProvider.includeUrl(false);
+      splunkLoggerProvider.errorThreshold(3);
+
+      $httpBackend.when('POST', testURL).respond(404);
+
+      service.sendMessage(message);
+      $httpBackend.flush();
+      service.sendMessage(message);
+      $httpBackend.flush();
+      service.sendMessage(message);
+      $httpBackend.flush();
+      $httpBackend.verifyNoOutstandingRequest();
+
+      service.sendMessage(message);
+      service.sendMessage(message);
+      service.sendMessage(message);
+      $httpBackend.verifyNoOutstandingRequest();
+    });
+
     it('will include the current url if includeUrl() is not set to false', function () {
       var expectMessage = { event: angular.extend(message, { url: 'http://bsplunk.com' }) };
       var testURL = 'https://splunk.logger.test.url/test';

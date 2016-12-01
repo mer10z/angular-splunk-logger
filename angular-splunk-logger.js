@@ -23,6 +23,7 @@
       var _loggingEnabled = true;
       var _labels = {};
       var _source = null;
+      var _errorThreshold = null;
 
       // The minimum level of messages that should be sent to splunk.
       var _level = 0;
@@ -30,10 +31,13 @@
       var _token = null;
       var _endpoint = null;
 
+      var _logToSplunk = logToSplunkNoErrorChecking;
+
       // configuration methods for this provider
       this.endpoint = endpoint;
       this.token = token;
       this.source = source;
+      this.errorThreshold = errorThreshold;
       this.fields = fields;
       this.labels = labels;
       this.includeUrl = includeUrl;
@@ -175,6 +179,48 @@
         return _logToConsole;
       }
 
+      // sets the error threshold and setups the correct logging function
+      function errorThreshold(e) {
+        if (angular.isDefined(e)) {
+          _errorThreshold = e;
+
+          if (_errorThreshold === null ) {
+            _logToSplunk = logToSplunkNoErrorChecking;
+          }
+          else {
+            _logToSplunk = getLogToSplunkWithErrorCheckingFunction();
+          }
+
+          return self;
+        }
+
+        return _errorThreshold;
+      }
+
+      // if no error threshold, use this function to blindly log
+      function logToSplunkNoErrorChecking($http, _endpoint, splunkEvent, config) {
+        $http.post(_endpoint, splunkEvent, config);
+      }
+
+      // if error threshold, check before logging and track success and failure
+      function getLogToSplunkWithErrorCheckingFunction() {
+        var errorCount = 0;
+        return function($http, _endpoint, splunkEvent, config) {
+          if (errorCount < _errorThreshold) {
+            $http.post(_endpoint, splunkEvent, config).then(
+              function() {
+                errorCount = 0;
+              },
+              function() {
+                ++errorCount;
+              }
+            );
+          }
+        };
+      }
+
+
+
       //
       // SplunkLogger object to be used in application
       //
@@ -249,8 +295,7 @@
             withCredentials: false
           };
 
-          //Ajax call to send data to splunk
-          $http.post(_endpoint, splunkEvent, config);
+          _logToSplunk($http, _endpoint, splunkEvent, config);
         };
 
         return {

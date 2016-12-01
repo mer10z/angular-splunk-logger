@@ -103,6 +103,14 @@ The following configuration options are available.
     // will be sent.
     .token( '<your-token>' )
 
+    // set the threshold of post errors to halt logging. This may be useful if your
+    // logging server goes down and you have sendConsoleErrors set to true and you
+    // also have an $http response interceptor that logs error responses. Note that
+    // due to the asynchronous nature of http requests, the threshold may be
+    // exceeded before halting logging. There is currently no way to re-enable
+    // logging after it is halted.
+    .errorThreshold( 20 )
+
     // set the source name for the splunk log message
     .source( '<your-source-name>' )
 
