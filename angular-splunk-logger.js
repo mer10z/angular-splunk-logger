@@ -289,10 +289,11 @@
           //Set header for splunk
           var config = {
             headers: {
-              'Authorization': 'Splunk ' + _token
+              'Authorization': 'Splunk ' + _token,
+              'Cache-Control': undefined
             },
             responseType: 'json',
-            withCredentials: false
+            withCredentials: true
           };
 
           _logToSplunk($http, _endpoint, splunkEvent, config);
