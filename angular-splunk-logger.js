@@ -290,7 +290,8 @@
           var config = {
             headers: {
               'Authorization': 'Splunk ' + _token,
-              'Cache-Control': undefined
+              'Cache-Control': undefined,
+              'Content-Type': undefined
             },
             responseType: 'json',
             withCredentials: true

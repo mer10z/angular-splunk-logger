@@ -1,6 +1,6 @@
 {
   "name": "angular-splunk-logger",
-  "version": "0.2.9",
+  "version": "0.2.10",
   "main": "angular-splunk-logger.js",
   "keywords": [
     "angularjs",
