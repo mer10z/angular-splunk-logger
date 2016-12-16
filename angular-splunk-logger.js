@@ -350,7 +350,7 @@
           var wrappedFn = function () {
             var args = Array.prototype.slice.call(arguments);
 
-            if (logger._logToConsole) {
+            if (logger.logToConsole()) {
               logFn.apply(null, args);
             }
 
